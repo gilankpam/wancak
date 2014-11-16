@@ -1,0 +1,37 @@
+{
+	"ImportPath": "github.com/gilankpam/1cak",
+	"GoVersion": "go1.3.3",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/cascadia",
+			"Comment": "null-31",
+			"Rev": "5d796540e3cb93ea0556c897e6a3c7690f614d35"
+		},
+		{
+			"ImportPath": "github.com/PuerkitoBio/goquery",
+			"Comment": "v0.3.2-58-gffa8a68",
+			"Rev": "ffa8a68c9f2882d21c77b65737c84e2f8690fa1f"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "14f550f51af52180c2eefed15e5fd18d63c0a64a"
+		},
+		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Rev": "0e84b7d810c16aed432217e330206be156bafae0"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
+			"ImportPath": "github.com/unrolled/render",
+			"Rev": "344f85e13ccf75f3d53a27adfcd553f84f05b855"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Comment": "null-211",
+			"Rev": "6b24d9e2649734d2c96ead9603008d385321ffc6"
+		}
+	]
+}
