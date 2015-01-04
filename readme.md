@@ -1,6 +1,6 @@
 # UnOfficial 1Cak API
 
-1Cak situsnya keren, sayang gak ada API nya :(
+Kabar gembira buat kita semua, kini 1Cak ada API nya :D
 
 ## Resource URL
 ```
