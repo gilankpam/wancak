@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetSectionPosts(t *testing.T) {
-	posts, err := GetPosts("lol", "")
+	posts, err := GetSectionPosts("lol")
 	if err != nil {
 		t.Errorf("Error gettting posts: %v", err)
 	}
@@ -16,7 +16,7 @@ func TestGetSectionPosts(t *testing.T) {
 }
 
 func TestInvalidPageId(t *testing.T) {
-	_, err := GetPosts("lol", "123123")
+	_, err := GetSectionPosts("lol", "123123")
 	if err != NotFoundErr {
 		t.Errorf("Expected not found error, got %v", err)
 	}
@@ -65,7 +65,32 @@ func TestGetInvalidPostId(t *testing.T) {
 }
 
 func TestSectionValidation(t *testing.T) {
-	if _, err := GetPosts("lawl", ""); err != InvalidSectionErr {
+	if _, err := GetSectionPosts("lawl", ""); err != InvalidSectionErr {
 		t.Errorf("Expected sectionErr, got %v", err)
+	}
+}
+
+func TestSearch(t *testing.T) {
+	q := "jomblo ngenes"
+	p, err := Search(q)
+	if err != nil {
+		t.Errorf("Shouldn't be an error, but got error: %v", err)
+	}
+	if len(p.Posts) != 3 {
+		t.Errorf("Expected post length 3, got %d", len(p.Posts))
+	}
+	p2, err := Search(q, p.Page.Next)
+	if err != nil {
+		t.Errorf("Shouldn't be an error, but got error: %v", err)
+	}
+	if len(p2.Posts) != 3 {
+		t.Errorf("Expected post length 3, got %d", len(p.Posts))
+	}
+}
+
+func TestSearchNotFound(t *testing.T) {
+	_, err := Search("awdasdwasdasdasd")
+	if err != NotFoundErr {
+		t.Errorf("Expected not found error, got %v", err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
+	gourl "net/url"
 	"strings"
 )
 
@@ -28,25 +29,78 @@ type Post struct {
 
 type Posts struct {
 	Page struct {
+		// adalah post id, digunakan untuk mengambil postingan selanjutnya
 		Next string `json:"next"`
 	} `json:"page"`
 	Posts []Post `json:"posts"`
 }
 
-func GetPosts(section, pageId string) (*Posts, error) {
-	var posts []Post
+// Ambil postingan per section (3 postingan)
+// parameter page id opsional, digunakan untuk mengambil
+// postingan selanjutnya
+func GetSectionPosts(section string, pageId ...string) (*Posts, error) {
 	var url string
 
 	if !isValidSection(section) {
 		return nil, InvalidSectionErr
 	}
 
-	if pageId == "" {
+	if len(pageId) == 0 {
 		url = Url1cak + "/" + section
 	} else {
-		url = fmt.Sprintf("%s/%s-%s", Url1cak, section, pageId)
+		url = fmt.Sprintf("%s/%s-%s", Url1cak, section, pageId[0])
 	}
+	return getPosts(url)
 
+}
+
+// Mencari postingan berdasarkan keyword tertentu
+// parameter page id opsional, digunakan untuk mengambil
+// postingan selanjutnya
+func Search(q string, pageId ...string) (*Posts, error) {
+	var url string
+
+	if len(pageId) == 0 {
+		url = fmt.Sprintf("%s/search-0-%s", Url1cak, gourl.QueryEscape(q))
+	} else {
+		url = fmt.Sprintf("%s/search-%s-%s", Url1cak, pageId[0], gourl.QueryEscape(q))
+	}
+	return getPosts(url)
+}
+
+// Mengambil postingan berdasarkan id post, jika id kosong,
+// ambil postingan acak
+func GetPostId(id string) (*Post, error) {
+	var url string
+	post := new(Post)
+	if id == "" {
+		url = Url1cak + "/shuffle"
+	} else {
+		url = Url1cak + "/" + id
+	}
+	doc, err := goquery.NewDocument(url)
+	if err != nil {
+		return nil, err
+	}
+	if isNotFound(doc) {
+		return nil, NotFoundErr
+	}
+	url, _ = doc.Find(".fb-comments").Attr("data-href")
+	post.Id = strings.Split(url, "/")[3]
+	post.Title = doc.Find("h3").Text()
+	post.NSFW = false
+	post.Img, _ = doc.Find("img[title]").Attr("src")
+	if !strings.HasPrefix(post.Img, "http://") {
+		post.Img = Url1cak + "/images/unsave.jpg"
+		post.NSFW = true
+	}
+	post.Url = url
+	post.Votes = doc.Find("#span_vote_" + post.Id).Text()
+	return post, nil
+}
+
+func getPosts(url string) (*Posts, error) {
+	var posts []Post
 	doc, err := goquery.NewDocument(url)
 	if err != nil {
 		log.Printf("Error getting web pages: %v", err)
@@ -93,36 +147,6 @@ func GetPosts(section, pageId string) (*Posts, error) {
 		Posts: posts,
 	}
 	return p, nil
-}
-
-//Get sigle post by id, if id is empty then get suffle post :p
-func GetPostId(id string) (*Post, error) {
-	var url string
-	post := new(Post)
-	if id == "" {
-		url = Url1cak + "/shuffle"
-	} else {
-		url = Url1cak + "/" + id
-	}
-	doc, err := goquery.NewDocument(url)
-	if err != nil {
-		return nil, err
-	}
-	if isNotFound(doc) {
-		return nil, NotFoundErr
-	}
-	url, _ = doc.Find(".fb-comments").Attr("data-href")
-	post.Id = strings.Split(url, "/")[3]
-	post.Title = doc.Find("h3").Text()
-	post.NSFW = false
-	post.Img, _ = doc.Find("img[title]").Attr("src")
-	if !strings.HasPrefix(post.Img, "http://") {
-		post.Img = Url1cak + "/images/unsave.jpg"
-		post.NSFW = true
-	}
-	post.Url = url
-	post.Votes = doc.Find("#span_vote_" + post.Id).Text()
-	return post, nil
 }
 
 func isNotFound(doc *goquery.Document) bool {

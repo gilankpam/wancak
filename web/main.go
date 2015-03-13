@@ -19,8 +19,9 @@ func main() {
 
 	goji.Get(regexp.MustCompile(`^/(?P<section>lol|trend|recent|legendary)$`), sectionHandler)
 	goji.Get(regexp.MustCompile(`^/(?P<section>lol|trend|recent|legendary)/(?P<id>[0-9]+)$`), sectionHandler)
-	goji.Get(regexp.MustCompile(`^/post/(?P<id>[0-9]+)$`), getSinglePost)
-	goji.Get(regexp.MustCompile(`^/random$`), getRandomPost)
+	goji.Get(regexp.MustCompile(`^/post/(?P<id>[0-9]+)$`), singlePostHandler)
+	goji.Get("/random", randomPostHandler)
+	goji.Get("/search", searchHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -32,10 +33,16 @@ func main() {
 }
 
 func sectionHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	section := c.URLParams["section"]
-	id := c.URLParams["id"]
+	var posts *wancak.Posts
+	var err error
 
-	posts, err := wancak.GetPosts(section, id)
+	section := c.URLParams["section"]
+	if id := c.URLParams["id"]; id == "" {
+		posts, err = wancak.GetSectionPosts(section)
+	} else {
+		posts, err = wancak.GetSectionPosts(section, id)
+	}
+
 	if err == wancak.NotFoundErr {
 		render.JSON(w, http.StatusNotFound, map[string]string{"status": "error", "message": "Posts not found"})
 		return
@@ -47,7 +54,7 @@ func sectionHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, http.StatusOK, posts)
 }
 
-func getRandomPost(c web.C, w http.ResponseWriter, r *http.Request) {
+func randomPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	post, err := wancak.GetPostId("")
 	if err != nil {
 		render.JSON(w, http.StatusInternalServerError, map[string]string{"status": "error", "message": "Can't get posts"})
@@ -56,7 +63,7 @@ func getRandomPost(c web.C, w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, http.StatusOK, post)
 }
 
-func getSinglePost(c web.C, w http.ResponseWriter, r *http.Request) {
+func singlePostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	postId := c.URLParams["id"]
 	post, err := wancak.GetPostId(postId)
 	if err == wancak.NotFoundErr {
@@ -68,4 +75,27 @@ func getSinglePost(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, http.StatusOK, post)
+}
+
+func searchHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	var posts *wancak.Posts
+	var err error
+
+	q := r.URL.Query().Get("q")
+	if pageId := r.URL.Query().Get("pageid"); pageId == "" {
+		posts, err = wancak.Search(q)
+	} else {
+		posts, err = wancak.Search(q, pageId)
+	}
+
+	if err == wancak.NotFoundErr {
+		render.JSON(w, http.StatusNotFound, map[string]string{"status": "error", "message": "Posts not found"})
+		return
+	}
+	if err != nil {
+		render.JSON(w, http.StatusInternalServerError, map[string]string{"status": "error", "message": "Can't get posts"})
+		return
+	}
+
+	render.JSON(w, http.StatusOK, posts)
 }
