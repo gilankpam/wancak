@@ -36,6 +36,13 @@ type Posts struct {
 }
 
 // Ambil postingan per section (3 postingan)
+//
+// List section:
+// lol : Hot
+// trend : Trending
+// recent : Vote
+// legendary : Legend
+//
 // parameter page id opsional, digunakan untuk mengambil
 // postingan selanjutnya
 func GetSectionPosts(section string, pageId ...string) (*Posts, error) {

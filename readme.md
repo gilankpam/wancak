@@ -1,12 +1,15 @@
 # UnOfficial 1Cak API
 
+[api doc](http://godoc.org/github.com/gilankpam/wancak)
+
 Kabar gembira buat kita semua, kini 1Cak ada API nya :D
 
 ### Fitur
 
-* Dapetin postingan per-section
-* Single post
-* Random post (shuffle)
+* [Dapetin postingan per-section](https://github.com/gilankpam/wancak#dapetin-postingan-per-section)
+* [Single post](https://github.com/gilankpam/wancak#single-post)
+* [Random post (shuffle)](https://github.com/gilankpam/wancak#random-post-shuffle)
+* [Search post](https://github.com/gilankpam/wancak#search-post)
 
 ## Dapetin postingan per-section
 ```
@@ -92,3 +95,17 @@ GET ```http://api-1cak.herokuapp.com/post/1009826```
 ```
 http://api-1cak.herokuapp.com/random
 ```
+
+## Search Post
+
+```
+http://api-1cak.herokuapp.com/search?q={keyword}&pageid={id}
+```
+
+Param:
+* keyword (required)
+* pageid (optional)
+
+contoh
+
+GET ```http://api-1cak.herokuapp.com/search?q=jomblo ngenes&pageid=123123123```
